@@ -144,6 +144,22 @@ Then /^(?:|I )should see \/([^\/]*)\/$/ do |regexp|
   end
 end
 
+Then /^(?:|I )should see the "([^"]*)" field$/ do |field|
+  if page.respond_to? :should
+    page.should have_field(field)
+  else
+    assert page.has_field?(field)
+  end
+end
+
+Then /^(?:|I )should see the "([^"]*)" button$/ do |button|
+  if page.respond_to? :should
+    page.should have_button(button)
+  else
+    assert page.has_button?(button)
+  end
+end
+
 Then /^(?:|I )should not see "([^"]*)"$/ do |text|
   if page.respond_to? :should
     page.should have_no_content(text)
@@ -250,6 +266,16 @@ Then /^the "([^"]*)" checkbox(?: within (.*))? should not be checked$/ do |label
     end
   end
 end
+
+Then /^the "([^"]*)" field should be empty$/ do |field_name|
+  field = find_field(field_name)
+  field_value = (field.tag_name == 'textarea') ? field.text : field.value
+  if field_value.respond_to? :should
+    field_value.should be_nil
+  else
+    assert_match(/^$/, field_value.to_s)
+  end
+end
  
 Then /^(?:|I )should be on (.+)$/ do |page_name|
   current_path = URI.parse(current_url).path
@@ -276,3 +302,4 @@ end
 Then /^show me the page$/ do
   save_and_open_page
 end
+

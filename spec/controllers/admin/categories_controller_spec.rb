@@ -11,9 +11,19 @@ describe Admin::CategoriesController do
     request.session = { :user => henri.id }
   end
 
-  it "test_index" do
-    get :index
-    assert_response :redirect, :action => 'index'
+  describe "test_index" do
+    it "should redirect to new" do
+      get :index
+      assert_response :redirect, :action => 'new'
+    end
+  end
+
+  describe "test_new" do
+    it 'should render template new' do
+      get :new
+      response.should have_rendered("new")
+      assert_tag :tag => "form"
+    end
   end
 
   describe "test_edit" do
