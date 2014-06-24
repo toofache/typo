@@ -1,7 +1,8 @@
 <% @page_heading = _("Categories") %>
 
 <div class='left_form'>
-  <%= form_tag :action=>"edit", :id => @category_id do %>
+  <%= form_tag :action=>"edit" do %>
+  <%= hidden_field :category, :id %>
   <%= error_messages_for 'category' %>
   <div class='clearfix'>
     <label for="category_name"><%= _("Name")%></label>
