@@ -49,7 +49,7 @@ class Admin::CategoriesController < Admin::BaseController
       new_category = false
     end
     respond_to do |format|
-      format.html { save_category(new_category) }
+      format.html { save_category }
       format.js do 
         @category.save
         @article = Article.new
@@ -59,12 +59,11 @@ class Admin::CategoriesController < Admin::BaseController
     end
   end
 
-  def save_category(new_category)
-    message = new_category ? 'created' : 'saved'
+  def save_category
     if @category.save!
-      flash[:notice] = _("Category was successfully #{message}.")
+      flash[:notice] = _('Category was successfully saved.')
     else
-      flash[:error] = _("Category could not be #{message}.")
+      flash[:error] = _('Category could not be saved.')
     end
     redirect_to :action => 'new'
   end
