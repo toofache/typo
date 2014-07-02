@@ -564,6 +564,52 @@ describe Admin::ContentController do
 
     end
 
+    describe 'merging articles' do
+
+      before :each do
+        @article = Factory(:article, :author => 'Author 1')
+        @second_article = Factory(:second_article, :author => 'Author 2', :body => 'Content from second article.')
+      end
+
+      it 'should have the merge article form' do
+        get :edit, 'id' => @article.id
+        response.should render_template('new')
+        assigns(:article).should_not be_nil
+        assigns(:article).should be_valid
+        response.should contain(/Merge Articles/)
+      end
+
+      it 'should call the model method to merge the articles with merge action' do
+        Article.should_receive(:find).with(@article.id).and_return(@article)
+        Article.should_receive(:find).with(@second_article.id).and_return(@second_article)
+        @article.should_receive(:merge_with).with(@second_article)
+        post :merge, "id" => @article.id, "merge_with" => @second_article.id
+        response.should redirect_to :action => 'edit', :id => @article.id
+        assigns(:article).should_not be_nil
+        assigns(:article).should be_valid
+      end
+
+      it "should generate an error when merging an article with itself" do
+        @article.should_not_receive(:merge_with)
+        post :merge, "id" => @article.id, "merge_with" => @article.id
+      end
+
+      it "should destroy the second article" do
+        Article.stub(:find).with(@article.id).and_return(@article)
+        Article.stub(:find).with(@second_article.id).and_return(@second_article)
+        @article.should_receive(:merge_with).with(@second_article)
+        @second_article.should_receive(:destroy)
+        post :merge, "id" => @article.id, "merge_with" => @second_article.id
+        response.should redirect_to :action => 'edit', :id => @article.id
+      end
+
+      it "should test that merge with article id should not be empty" do
+        post :merge, "id" => @article.id, "merge_with" => ''
+        response.should redirect_to :action => 'edit', :id => @article.id
+      end
+
+    end
+
     describe 'resource_remove action' do
 
       it 'should remove resource' do

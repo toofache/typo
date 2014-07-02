@@ -264,6 +264,19 @@ class Article < Content
                     :order => 'published_at desc')
   end
 
+  def merge_with(article)
+    if article.body.to_s.length > 0
+      self.body = self.body.to_s + ' ' + article.body.to_s
+    end
+    if article.extended.to_s.length > 0
+      self.extended = self.extended.to_s + ' ' + article.extended.to_s
+    end
+    comments << article.comments
+    trackbacks << article.trackbacks
+    categories << article.categories
+    save
+  end
+
   # Count articles on a certain date
   def self.count_by_date(year, month = nil, day = nil, limit = nil)
     if !year.blank?

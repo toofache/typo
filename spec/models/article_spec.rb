@@ -630,5 +630,38 @@ describe Article do
     end
 
   end
+
+  describe "merging articles" do
+    before :each do
+      @article1 = Article.new(:title => 'Title 1', :body => 'Body 1', :author => 'Author 1')
+      @article2 = Article.new(:title => 'Title 2', :body => 'Body 2', :author => 'Author 2')
+    end
+
+    it "should use the title of the first article as title" do
+      @article1.merge_with(@article2)
+      @article1.title.should == 'Title 1'
+    end
+
+    it "should use the author of the first article as author" do
+      @article1.merge_with(@article2)
+      @article1.author.should == 'Author 1'
+    end
+
+    it "should contain the body of both articles" do
+      @article1.merge_with(@article2)
+      @article1.body.should == "Body 1 Body 2"
+    end
+
+    it "should contain the comments from both articles" do
+      comment1 = Comment.new( :author => "User 1", :body => "Comment 1")
+      @article1.comments << comment1
+      comment2 = Comment.new( :author => "User 2", :body => "Comment 2")
+      @article2.comments << comment2
+      @article1.stub(:save)
+      @article1.merge_with(@article2)
+      @article1.comments.size.should == 2
+    end
+
+  end
 end
 
