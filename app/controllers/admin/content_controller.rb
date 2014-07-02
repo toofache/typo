@@ -52,6 +52,28 @@ class Admin::ContentController < Admin::BaseController
     redirect_to :action => 'index'
   end
 
+  def merge
+    if params[:id].to_s.length == 0 or params[:merge_with].to_s.length == 0
+      flash[:error] = _("Invalid article provided for merging")
+      return redirect_to :action => 'edit', :id => params[:id]
+    end
+
+    if params[:id] != params[:merge_with]
+      @article = Article.find(params[:id])
+      article2 = Article.find(params[:merge_with])
+      if !@article.nil? and !article2.nil?
+        @article.merge_with(article2)
+        article2.destroy
+        flash[:notice] = _("This articles were merged successfully.")
+      else
+        flash[:error] = _("Article is not valid")
+      end
+    else
+      flash[:error] = _("Error, you cannot merge an article with itself")
+    end
+    redirect_to :action => 'edit', :id => params[:id]
+  end
+
   def insert_editor
     editor = 'visual'
     editor = 'simple' if params[:editor].to_s == 'simple'
@@ -177,6 +199,7 @@ class Admin::ContentController < Admin::BaseController
       end
     end
 
+    @can_be_merged = !id.nil?
     @images = Resource.images_by_created_at.page(params[:page]).per(10)
     @resources = Resource.without_images_by_filename
     @macros = TextFilter.macro_filters
