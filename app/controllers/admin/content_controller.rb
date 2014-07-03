@@ -64,7 +64,9 @@ class Admin::ContentController < Admin::BaseController
       article1 = Article.find(params[:id])
       article2 = Article.find(params[:merge_with])
       if !article1.nil? and !article2.nil?
-        Article.merge(article1, article2)
+        article1.merge(article2)
+        article2.comments(true)
+        article2.destroy
         flash[:notice] = _("The articles were merged successfully.")
       else
         flash[:error] = _("Invalid article")

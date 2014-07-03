@@ -592,7 +592,7 @@ describe Admin::ContentController do
         Article.should_receive(:find).with(@article.id).and_return(@article)
         Article.should_receive(:find).with(@second_article.id).and_return(@second_article)
         fake_result = Factory(:article, :author => 'Author 1', :body => 'A content with several data Content from second article.')
-        Article.should_receive(:merge).with(@article, @second_article).and_return(fake_result)
+        @article.should_receive(:merge).with(@second_article).and_return(fake_result)
         post :merge, "id" => @article.id, "merge_with" => @second_article.id
       end
 
@@ -610,9 +610,17 @@ describe Admin::ContentController do
         Article.stub(:find).with(@article.id).and_return(@article)
         Article.stub(:find).with(@second_article.id).and_return(@second_article)
         fake_result = Factory(:article, :author => 'Author 1', :body => 'A content with several data Content from second article.')
-        Article.stub(:merge).with(@article, @second_article).and_return(fake_result)
+        @article.stub(:merge).with(@second_article).and_return(fake_result)
         post :merge, "id" => @article.id, "merge_with" => @second_article.id
         response.should redirect_to :action => 'index'
+      end
+
+      it "should destroy the merging article" do
+        Article.stub(:find).with(@article.id).and_return(@article)
+        Article.stub(:find).with(@second_article.id).and_return(@second_article)
+        @article.stub(:merge)
+        @second_article.should_receive(:destroy)
+        post :merge, "id" => @article.id, "merge_with" => @second_article.id
       end
 
     end

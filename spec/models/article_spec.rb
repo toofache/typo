@@ -638,18 +638,18 @@ describe Article do
     end
 
     it "should use the title of the first article as title" do
-      merged_article = Article.merge(@article1, @article2)
-      merged_article.title.should == 'Title 1'
+      @article1.merge(@article2)
+      @article1.title.should == 'Title 1'
     end
 
     it "should use the author of the first article as author" do
-      merged_article = Article.merge(@article1, @article2)
-      merged_article.author.should == 'Author 1'
+      @article1.merge(@article2)
+      @article1.author.should == 'Author 1'
     end
 
     it "should contain the body of both articles" do
-      merged_article = Article.merge(@article1, @article2)
-      merged_article.body.should == "Body 1 Body 2"
+      @article1.merge(@article2)
+      @article1.body.should == "Body 1 Body 2"
     end
 
     it "should contain the comments from both articles" do
@@ -657,15 +657,10 @@ describe Article do
       comment1.save
       comment2 = @article2.add_comment( :author => "User 2", :body => "Comment 2")
       comment2.save
-      merged_article = Article.merge(@article1, @article2)
-      merged_article.comments.size.should == 2
+      @article1.merge(@article2)
+      @article1.comments.find(comment2.id).should == comment2
     end
 
-    it "should destory the original articles" do
-      @article1.should_receive(:destroy)
-      @article2.should_receive(:destroy)
-      merged_article = Article.merge(@article1, @article2)
-    end
   end
 end
 
