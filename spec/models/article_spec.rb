@@ -661,6 +661,11 @@ describe Article do
       merged_article.comments.size.should == 2
     end
 
+    it "should destory the original articles" do
+      @article1.should_receive(:destroy)
+      @article2.should_receive(:destroy)
+      merged_article = Article.merge(@article1, @article2)
+    end
   end
 end
 
