@@ -53,25 +53,28 @@ class Admin::ContentController < Admin::BaseController
   end
 
   def merge
+    ( flash[:error] = _("You need to be an admin to merge articles") and return redirect_to :action => 'index') unless current_user.admin?
+
     if params[:id].to_s.length == 0 or params[:merge_with].to_s.length == 0
       flash[:error] = _("Invalid article provided for merging")
-      return redirect_to :action => 'edit', :id => params[:id]
+      return redirect_to :action => 'index'
     end
 
     if params[:id] != params[:merge_with]
-      @article = Article.find(params[:id])
+      article1 = Article.find(params[:id])
       article2 = Article.find(params[:merge_with])
-      if !@article.nil? and !article2.nil?
-        @article.merge_with(article2)
-        article2.destroy
-        flash[:notice] = _("This articles were merged successfully.")
+      if !article1.nil? and !article2.nil?
+        Article.merge(article1, article2)
+        flash[:notice] = _("The articles were merged successfully.")
       else
-        flash[:error] = _("Article is not valid")
+        flash[:error] = _("Invalid article")
+        return redirect_to :action => 'index'
       end
     else
       flash[:error] = _("Error, you cannot merge an article with itself")
+      return redirect_to :action => 'index'
     end
-    redirect_to :action => 'edit', :id => params[:id]
+    redirect_to :action => 'index'
   end
 
   def insert_editor
@@ -199,7 +202,7 @@ class Admin::ContentController < Admin::BaseController
       end
     end
 
-    @can_be_merged = !id.nil?
+    @can_be_merged = current_user.admin? && !id.nil?
     @images = Resource.images_by_created_at.page(params[:page]).per(10)
     @resources = Resource.without_images_by_filename
     @macros = TextFilter.macro_filters

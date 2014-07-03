@@ -264,17 +264,17 @@ class Article < Content
                     :order => 'published_at desc')
   end
 
-  def merge_with(article)
-    if article.body.to_s.length > 0
-      self.body = self.body.to_s + ' ' + article.body.to_s
-    end
-    if article.extended.to_s.length > 0
-      self.extended = self.extended.to_s + ' ' + article.extended.to_s
-    end
-    comments << article.comments
-    trackbacks << article.trackbacks
-    categories << article.categories
-    save
+  def self.merge(article1, article2)
+    merged_article = Article.get_or_build_article
+    merged_article.title = article1.title
+    merged_article.author = article1.author
+    merged_article.body = article1.body.to_s + ' ' + article2.body.to_s
+    merged_article.extended = article1.extended.to_s + ' ' + article2.extended.to_s
+    merged_article.save
+    merged_article.comments << article1.comments
+    merged_article.comments << article2.comments
+    merged_article.save
+    merged_article
   end
 
   # Count articles on a certain date

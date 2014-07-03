@@ -579,33 +579,40 @@ describe Admin::ContentController do
         response.should contain(/Merge Articles/)
       end
 
+      it "should not have the merge article form when user is not admin" do
+        user = Factory(:user, :profile => Factory(:profile_publisher))
+        article = Factory(:article, :author => 'Author 1', :user => user)
+        request.session = { :user => user.id }
+        get :edit, 'id' => article.id
+        response.should render_template('new')
+        response.should_not contain(/Merge Articles/)
+      end
+
       it 'should call the model method to merge the articles with merge action' do
         Article.should_receive(:find).with(@article.id).and_return(@article)
         Article.should_receive(:find).with(@second_article.id).and_return(@second_article)
-        @article.should_receive(:merge_with).with(@second_article)
+        fake_result = Factory(:article, :author => 'Author 1', :body => 'A content with several data Content from second article.')
+        Article.should_receive(:merge).with(@article, @second_article).and_return(fake_result)
         post :merge, "id" => @article.id, "merge_with" => @second_article.id
-        response.should redirect_to :action => 'edit', :id => @article.id
-        assigns(:article).should_not be_nil
-        assigns(:article).should be_valid
       end
 
       it "should generate an error when merging an article with itself" do
-        @article.should_not_receive(:merge_with)
+        Article.should_not_receive(:merge)
         post :merge, "id" => @article.id, "merge_with" => @article.id
-      end
-
-      it "should destroy the second article" do
-        Article.stub(:find).with(@article.id).and_return(@article)
-        Article.stub(:find).with(@second_article.id).and_return(@second_article)
-        @article.should_receive(:merge_with).with(@second_article)
-        @second_article.should_receive(:destroy)
-        post :merge, "id" => @article.id, "merge_with" => @second_article.id
-        response.should redirect_to :action => 'edit', :id => @article.id
       end
 
       it "should test that merge with article id should not be empty" do
         post :merge, "id" => @article.id, "merge_with" => ''
-        response.should redirect_to :action => 'edit', :id => @article.id
+        response.should redirect_to :action => 'index'
+      end
+
+      it "should include merged article in the list" do
+        Article.stub(:find).with(@article.id).and_return(@article)
+        Article.stub(:find).with(@second_article.id).and_return(@second_article)
+        fake_result = Factory(:article, :author => 'Author 1', :body => 'A content with several data Content from second article.')
+        Article.stub(:merge).with(@article, @second_article).and_return(fake_result)
+        post :merge, "id" => @article.id, "merge_with" => @second_article.id
+        response.should redirect_to :action => 'index'
       end
 
     end
