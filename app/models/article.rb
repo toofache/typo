@@ -271,12 +271,14 @@ class Article < Content
     merged_article.body = article1.body.to_s + ' ' + article2.body.to_s
     merged_article.extended = article1.extended.to_s + ' ' + article2.extended.to_s
     merged_article.save
-    merged_article.comments << article1.comments
+    article1.comments.each { |comment|
+      merged_article.add_comment(comment.attributes)
+    }
     merged_article.save
-    merged_article.comments << article2.comments
+    article2.comments.each { |comment|
+      merged_article.add_comment(comment.attributes)
+    }
     merged_article.save
-    article1.comments(true)
-    article2.comments(true)
     article1.destroy
     article2.destroy
     merged_article
